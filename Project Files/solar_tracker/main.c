@@ -7,6 +7,9 @@ volatile float bottomsensor;
 volatile float LRdiff, TBdiff;
 volatile float leftright, topbottom;
 
+volatile float LRCalibration, TBCalibration;
+
+void ButtonSetup(void);
 
 void configurePWM()
 {
@@ -15,10 +18,10 @@ void configurePWM()
    P1SEL |= BIT2;                                       // Selects the port 1.2 as the timer A output
    P1DIR |= BIT3;
    P1SEL |= BIT3;
-   TA0CTL = TASSEL_2 | MC_1 | TACLR;                    // Sets timerA_0 to SMCLK, up-mode, clears the register
-   TA0CCR0 = 19999;                                     // Sets CCR0 max pwm
-   TA0CCR1 = 1499;                                      // Sets CCR1 to initial value of 90 degree position for base motor
-   TA0CCR2 = 1499;                                      // Sets CCR2 to initial value of 90 degree position for hub motor
+   TA0CTL = TASSEL_1 | MC_1 | TACLR;                    // Sets timerA_0 to SMCLK, up-mode, clears the register
+   TA0CCR0 = 655;                                     // Sets CCR0 max pwm
+   TA0CCR1 = 50;                                      // Sets CCR1 to initial value of 90 degree position for base motor
+   TA0CCR2 = 50;                                      // Sets CCR2 to initial value of 90 degree position for hub motor
    TA0CCTL1 = OUTMOD_7;                                 // Output mode 7 reset/set
    TA0CCTL2 = OUTMOD_7;                                 // Output mode 7 reset/set
 }
@@ -62,6 +65,7 @@ int main(void)
       //configureUARTLED();
       //configureUART();
       configureADC();
+      ButtonSetup();
 while(1)
     {
             ADC12CTL0 |= ADC12SC;
@@ -80,68 +84,34 @@ void __attribute__ ((interrupt(ADC12_VECTOR))) ADC12ISR (void)
 #error Compiler not supported!
 #endif
 {
-   switch (__even_in_range(ADC12IV,34))
-   {
-
-   case 12:
-   {
         // Temperature calculations
         topsensor = ADC12MEM0;                                // Sets the digital voltage value to float ADC for math
         bottomsensor = ADC12MEM1;
         rightsensor = ADC12MEM2;
         leftsensor = ADC12MEM3;
 
-        LRdiff = leftsensor - rightsensor;
-        TBdiff = topsensor - bottomsensor;
-        if (TBdiff > 10)
-        {
-            topbottom += TBdiff * 2;
-        }
-       if (LRdiff > 10)
-       {
-           leftright += LRdiff * 2;
-       }
-        if (leftright <= 999)
-                    {
-                        TA0CCR1 = 999;
-                    }
+        LRdiff = (leftsensor - rightsensor) - LRCalibration;
+        TBdiff = (topsensor - bottomsensor) - TBCalibration;
 
-                    else if (leftright >= 1999)
-                    {
-                        TA0CCR1 = 1999;
-                    }
+        topbottom += TBdiff * 0.05;
+        leftright += LRdiff * 0.05;
 
-                    else if (leftright < 999)
-                    {
-                        TA0CCR1 = 999;
-                    }
-                    else
-                    {
-                        TA0CCR1 = leftright;
-                    }
-        if (topbottom <= 999)
-                         {
-                             TA0CCR2 = 999;
-                         }
+        if (leftright <= 33) leftright = 33;
+        if (leftright >= 66) leftright = 66;
 
-                         else if (topbottom >= 1999)
-                         {
-                             TA0CCR2 = 1999;
-                         }
+        if (topbottom <= 33) topbottom = 33;
+        if (topbottom >= 66) topbottom = 66;
 
-                         else if (topbottom < 999)
-                         {
-                             TA0CCR2 = 999;
-                         }
-                         else
-                         {
-                             TA0CCR2 = topbottom;
-                         }
-                break;
-   }
-   default: break;
-   }
+        TA0CCR1 = leftright;
+        TA0CCR2 = topbottom;
 }
 
+#pragma vector = PORT1_VECTOR               // Interrupt when button is pressed and released
+__interrupt void Port_1(void)
+{
+    LRCalibration = leftsensor - rightsensor;
+    TBCalibration = topsensor - bottomsensor;
 
+    P1IFG &= ~BIT1;
+}
 

@@ -9,21 +9,27 @@ CMD_SRCS += \
 ../lnk_msp430f5529.cmd 
 
 C_SRCS += \
+../ButtonSetup.c \
 ../main.c 
 
 C_DEPS += \
+./ButtonSetup.d \
 ./main.d 
 
 OBJS += \
+./ButtonSetup.obj \
 ./main.obj 
 
 OBJS__QUOTED += \
+"ButtonSetup.obj" \
 "main.obj" 
 
 C_DEPS__QUOTED += \
+"ButtonSetup.d" \
 "main.d" 
 
 C_SRCS__QUOTED += \
+"../ButtonSetup.c" \
 "../main.c" 
 
 
