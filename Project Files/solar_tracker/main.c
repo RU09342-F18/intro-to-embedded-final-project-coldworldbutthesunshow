@@ -92,8 +92,7 @@ void __attribute__ ((interrupt(ADC12_VECTOR))) ADC12ISR (void)
         rightsensor = ADC12MEM2;
         leftsensor = ADC12MEM3;
         solarvoltage = ADC12MEM4;
-        volt = solarvoltage;
-
+        volt = solarvoltage * 1.5;
         UCA1TXBUF = (int) volt;
         P1OUT ^= BIT0;
         LRdiff = (leftsensor - rightsensor) - LRCalibration;
