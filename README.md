@@ -1,5 +1,5 @@
 # Solar Tracking System
-Tiernan Cuesta - Ian Nielsen - Kevin Purcell \\
+Tiernan Cuesta - Ian Nielsen - Kevin Purcell \
 A solar tracking application to increase output power over an extended period of time. This system requires two micro servo motors, and 4 photoresistors as the main devices. An MSP430F5529 launchpad kit is used to run the control interface. 
 ## Functionality
 The four photoresistors that are arranged in a North, East, South, and West configuration are used to balance the system. In other words, difference in resistance of opposing light dependant resistors tell the servos to correct the error so that the photovoltaic cell maintains orthogonality with the sun. The maximum output power of the cell is achieved over longer periods of time, given satisfactory environmental conditions. Typically, the range of motion of the system is 0-180 azimuth and altitude angle given no mechanical restriction.
